@@ -4,7 +4,7 @@ function setup() {
   ENERGY = 5;
 
   frame=0;
-  MAX_FRAME=2000;
+  MAX_FRAME=-1     // -1 means unlimited
 
   P5_SAVE_FRAMES_HIDE_UI=true
 
@@ -76,7 +76,6 @@ function distance(p1, p2) {
 }
 
 function isInRange(x, lower, upper) {
-  console.log("CHECKINg RANGE");
   return (x > lower && x < upper);
 }
 
@@ -133,14 +132,13 @@ function shuffleArray(array) {
 function draw() {
 
   if (3*triangles.length + stars.length  > 3 * NUMBER_OF_TRIANGLES) {
-    frame = 1000000;
+    frame = -1;
   }
 
-  frame+=1;
-
-  if (frame <MAX_FRAME) {
-    console.log("START FRAME");
-    console.log(3*triangles.length + stars.length);
+  if (frame >= 0 && (MAX_FRAME== -1 || frame < MAX_FRAME)) {
+    frame+=1;
+//    console.log("START FRAME");
+//    console.log(3*triangles.length + stars.length);
 
     // strokeColor = `rgba(${cellHue},${cellSaturation},${cellBrightness},${BACKGROUND_FADE})`;
     background(refreshColor);
@@ -152,7 +150,7 @@ function draw() {
     trianglesToRemoveIndexes=[];
 
     triangles.forEach( (tri, index) => {
-  //        console.log(tri);
+//        console.log(tri);
 
       if (tri.eq < 0.99) {
         triangle(tri.p1.x, tri.p1.y, tri.p2.x, tri.p2.y, tri.p3.x, tri.p3.y);
@@ -177,7 +175,7 @@ function draw() {
       triangles.splice(indexToRemove, 1);
     });
 
-    console.log(stars.length);
+//    console.log(stars.length);
     if (stars.length > 50) {
       frame=6000;
     }
@@ -192,33 +190,33 @@ function draw() {
         voisins=stars.filter(elt => elt.free).filter(elt => elt.uuid != star.uuid).filter(elt => (isInRange(distance(elt, star), 5*ENERGY, 110)));
 
         if (voisins.length >=2) {
-          console.log("For free star with voisins");
-          console.log(voisins);
+//          console.log("For free star with voisins");
+//          console.log(voisins);
           shuffleArray(voisins)
-          console.log(voisins);
-          console.log("Trying to add a new triangle");
-          console.log("Triangles ---");
-          console.log(triangles);
-          console.log("Stars");
-          console.log(stars);
-          console.log("index");
-          console.log(index);
-          console.log("star");
-          console.log(star);
-          console.log("voisins");
-          console.log(voisins);
+//          console.log(voisins);
+//          console.log("Trying to add a new triangle");
+//          console.log("Triangles ---");
+//          console.log(triangles);
+//          console.log("Stars");
+//          console.log(stars);
+//          console.log("index");
+//          console.log(index);
+//          console.log("star");
+//          console.log(star);
+//          console.log("voisins");
+//          console.log(voisins);
           starcopy={...star};
           newTri = t(starcopy, voisins[0], voisins[1]);
-          console.log("newTri");
-          console.log(newTri);
+//          console.log("newTri");
+//          console.log(newTri);
           if (newTri.eq < 0.6) {
             triangles.push(newTri);
             stars.find(x => x.uuid == voisins[0].uuid).free=false;
             stars.find(x => x.uuid == voisins[1].uuid).free=false;
             stars.find(x => x.uuid == star.uuid).free = false;
-            console.log("New tri is ok; will be created");
-            console.log("Stars");
-            console.log(stars)
+//            console.log("New tri is ok; will be created");
+//            console.log("Stars");
+//            console.log(stars)
           } else {
             movedStar = movePoint(star, ENERGY);
             stars[index] = movedStar;
@@ -229,10 +227,10 @@ function draw() {
         }
       }
     }
-    console.log(stars);
+//    console.log(stars);
     stars = stars.filter(x => x.free);
-    console.log(stars);
-    console.log("Triangles:");
-    console.log(triangles);
+//    console.log(stars);
+//    console.log("Triangles:");
+//    console.log(triangles);
   }
 }

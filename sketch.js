@@ -20,6 +20,8 @@ function setup() {
   CENTER_X = WIDTH / 2;
   CENTER_Y = HEIGHT / 2;
 
+  CENTER = p(CENTER_X, CENTER_Y, 0, false);
+
   NUMBER_OF_TRIANGLES = 10;
   DISPLACEMENT = 4;
 
@@ -75,7 +77,22 @@ function randval(energy) {
   return int(random(-energy-0.5, energy+0.5));
 }
 
+function v(p1,p2) {
+  return {
+    x: (p2.x - p1.x),
+    y: (p2.y - p1.y),
+  }
+}
+
 function movePoint(point, energy) {
+  if (point.free) {
+    d = distance(point, CENTER);
+    if (d>400) {
+      vec = v(point, CENTER);
+      point.x += int(vec.x/100);
+      point.y += int(vec.y/100);
+    }
+  }
   newPoint = p(point.x + randval(energy), point.y + randval(energy), 0, point.free);
   return newPoint;
 }
@@ -107,6 +124,12 @@ function shuffleArray(array) {
 }
 
 function draw() {
+
+  console.log("START FRAME");
+  console.log(3*triangles.length + stars.length);
+  if (3*triangles.length + stars.length  > 3 * NUMBER_OF_TRIANGLES) {
+    frame = 1000000;
+  }
 
   frame+=1;
   if (frame <MAX_FRAME) {
@@ -179,6 +202,8 @@ function draw() {
         }
       }
     }
+    console.log(stars);
     stars = stars.filter(x => x.free);
+    console.log(stars);
   }
 }

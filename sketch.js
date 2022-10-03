@@ -23,6 +23,7 @@ function setup() {
   CENTER = p(CENTER_X, CENTER_Y, 0, false, "CENTER");
 
   NUMBER_OF_TRIANGLES = 400;
+  EQUILATERALITY_RATIO = 0.999
   DISPLACEMENT = 4;
 
 
@@ -112,10 +113,10 @@ function movePoint(point, energy) {
       point.y += int(vec.y/100);
     }
   } else {
-    if (d<1000) {
+    if (d<800) {
       vec = v(point, CENTER);
-      point.x -= int(vec.x/500);
-      point.y -= int(vec.y/500);
+      point.x -= int(vec.x/200);
+      point.y -= int(vec.y/200);
     }
   }
   newPoint = p(point.x + randval(energy), point.y + randval(energy), 0, point.free, point.uuid);
@@ -172,7 +173,7 @@ function draw() {
 
       strokeColor = COLOR_PALETTE[Math.floor(Math.random() * COLOR_PALETTE.length)];
       stroke(strokeColor);
-      if (tri.eq < 0.99) {
+      if (tri.eq < EQUILATERALITY_RATIO) {
         triangle(tri.p1.x, tri.p1.y, tri.p2.x, tri.p2.y, tri.p3.x, tri.p3.y);
 
         c1 = moveTriangle(tri, ENERGY);

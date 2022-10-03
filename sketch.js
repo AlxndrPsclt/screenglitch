@@ -22,7 +22,7 @@ function setup() {
 
   CENTER = p(CENTER_X, CENTER_Y, 0, false, "CENTER");
 
-  NUMBER_OF_TRIANGLES = 10;
+  NUMBER_OF_TRIANGLES = 100;
   DISPLACEMENT = 4;
 
   // Default config; can be overrided later by a named, or custom config

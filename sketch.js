@@ -20,7 +20,7 @@ function setup() {
   CENTER_X = WIDTH / 2;
   CENTER_Y = HEIGHT / 2;
 
-  CENTER = p(CENTER_X, CENTER_Y, 0, false);
+  CENTER = p(CENTER_X, CENTER_Y, 0, false, "CENTER");
 
   NUMBER_OF_TRIANGLES = 10;
   DISPLACEMENT = 4;
@@ -38,11 +38,13 @@ function setup() {
   stars=[];
 }
 
-function p(x,y,radius=0,free=true) {
+function p(x,y,enregy=0,free=true,uuid='') {
+  puuid = uuid? uuid : crypto.randomUUID();
   return {
-    x: x + randval(radius),
-    y: y + randval(radius),
+    x: x + randval(enregy),
+    y: y + randval(enregy),
     free: free,
+    uuid: puuid,
   }
 }
 
@@ -73,6 +75,11 @@ function distance(p1, p2) {
   return Math.sqrt((p2.x - p1.x)**2 + (p2.y - p1.y)**2);
 }
 
+function isInRange(x, lower, upper) {
+  console.log("CHECKINg RANGE");
+  return (x > lower && x < upper);
+}
+
 function randval(energy) {
   return int(random(-energy-0.5, energy+0.5));
 }
@@ -93,7 +100,7 @@ function movePoint(point, energy) {
       point.y += int(vec.y/100);
     }
   }
-  newPoint = p(point.x + randval(energy), point.y + randval(energy), 0, point.free);
+  newPoint = p(point.x + randval(energy), point.y + randval(energy), 0, point.free, point.uuid);
   return newPoint;
 }
 
@@ -113,7 +120,7 @@ function equilateralityCoeficient(tri) {
 }
 
 function calculateDistancesWithIndex(idx, star1, star2) {
-  return { 'starId': idx, 'dst': distance(star1, star2) }
+  return { 'starId': idx, 'dst': distance(star1, star2), 'otherStar': star2 }
 }
 
 function shuffleArray(array) {
@@ -125,14 +132,15 @@ function shuffleArray(array) {
 
 function draw() {
 
-  console.log("START FRAME");
-  console.log(3*triangles.length + stars.length);
   if (3*triangles.length + stars.length  > 3 * NUMBER_OF_TRIANGLES) {
     frame = 1000000;
   }
 
   frame+=1;
+
   if (frame <MAX_FRAME) {
+    console.log("START FRAME");
+    console.log(3*triangles.length + stars.length);
 
     // strokeColor = `rgba(${cellHue},${cellSaturation},${cellBrightness},${BACKGROUND_FADE})`;
     background(refreshColor);
@@ -180,21 +188,40 @@ function draw() {
       if (star.free) {
         circle(star.x, star.y, 5);
 
-        voisins=stars.filter(elt => elt.free).map((otherStar, idx) => calculateDistancesWithIndex(idx, star, otherStar)).filter(x => (x.dst>5*ENERGY && x.dst < 110));
+        //voisins=stars.filter(elt => elt.free).filter(elt => elt.uuid != star.uuid).map((otherStar, idx) => calculateDistancesWithIndex(idx, star, otherStar)).filter(x => (x.dst>5*ENERGY && x.dst < 110));
+        voisins=stars.filter(elt => elt.free).filter(elt => elt.uuid != star.uuid).filter(elt => (isInRange(distance(elt, star), 5*ENERGY, 110)));
 
         if (voisins.length >=2) {
-          shuffleArray(voisins)
-          console.log(stars);
-          console.log(index);
-          console.log(star);
+          console.log("For free star with voisins");
           console.log(voisins);
-          newTri = t(star, stars[voisins[0].starId], stars[voisins[1].starId]);
+          shuffleArray(voisins)
+          console.log(voisins);
+          console.log("Trying to add a new triangle");
+          console.log("Triangles ---");
+          console.log(triangles);
+          console.log("Stars");
+          console.log(stars);
+          console.log("index");
+          console.log(index);
+          console.log("star");
+          console.log(star);
+          console.log("voisins");
+          console.log(voisins);
+          starcopy={...star};
+          newTri = t(starcopy, voisins[0], voisins[1]);
+          console.log("newTri");
+          console.log(newTri);
           if (newTri.eq < 0.6) {
             triangles.push(newTri);
-            stars[voisins[0].starId].free=false;
-            stars[voisins[1].starId].free=false;
-            stars[index].free = false;
+            stars.find(x => x.uuid == voisins[0].uuid).free=false;
+            stars.find(x => x.uuid == voisins[1].uuid).free=false;
+            stars.find(x => x.uuid == star.uuid).free = false;
+            console.log("New tri is ok; will be created");
+            console.log("Stars");
             console.log(stars)
+          } else {
+            movedStar = movePoint(star, ENERGY);
+            stars[index] = movedStar;
           }
         } else {
           movedStar = movePoint(star, ENERGY);
@@ -205,5 +232,7 @@ function draw() {
     console.log(stars);
     stars = stars.filter(x => x.free);
     console.log(stars);
+    console.log("Triangles:");
+    console.log(triangles);
   }
 }

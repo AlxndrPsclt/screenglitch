@@ -1,6 +1,6 @@
 function setup() {
 
-  BACKGROUND_FADE = '0.2';
+  BACKGROUND_FADE = '0.1';
   ENERGY = 5;
 
   frame=0;
@@ -22,8 +22,21 @@ function setup() {
 
   CENTER = p(CENTER_X, CENTER_Y, 0, false, "CENTER");
 
-  NUMBER_OF_TRIANGLES = 100;
+  NUMBER_OF_TRIANGLES = 400;
   DISPLACEMENT = 4;
+
+
+  COLOR_PALETTE = [
+    "#03071e55", "#37061755", "#6a040f55", "#9d020855", "#d0000055", "#dc2f0255", "#e85d0455", "#f48c0655", "#faa30755", "#ffba0855"
+  ];
+  COLOR_PALETTE = [
+    "#02315E33",
+    "#00457E33",
+    "#2F70AF33",
+    "#B9848C33",
+    "#80649133",
+  ];
+
 
   // Default config; can be overrided later by a named, or custom config
   refreshColor = `rgba(10,20,40,0.1)`;
@@ -91,12 +104,18 @@ function v(p1,p2) {
 }
 
 function movePoint(point, energy) {
+  d = distance(point, CENTER);
   if (point.free) {
-    d = distance(point, CENTER);
     if (d>400) {
       vec = v(point, CENTER);
       point.x += int(vec.x/100);
       point.y += int(vec.y/100);
+    }
+  } else {
+    if (d<1000) {
+      vec = v(point, CENTER);
+      point.x -= int(vec.x/500);
+      point.y -= int(vec.y/500);
     }
   }
   newPoint = p(point.x + randval(energy), point.y + randval(energy), 0, point.free, point.uuid);
@@ -142,8 +161,7 @@ function draw() {
 
     // strokeColor = `rgba(${cellHue},${cellSaturation},${cellBrightness},${BACKGROUND_FADE})`;
     background(refreshColor);
-    strokeColor = `rgba(40,80,160,${BACKGROUND_FADE})`;
-    stroke(strokeColor);
+    //strokeColor = `rgba(40,80,160,${BACKGROUND_FADE})`;
     fill(`rgba(10,20,40,${BACKGROUND_FADE})`);
     strokeWeight(4);
 
@@ -152,6 +170,8 @@ function draw() {
     triangles.forEach( (tri, index) => {
 //        console.log(tri);
 
+      strokeColor = COLOR_PALETTE[Math.floor(Math.random() * COLOR_PALETTE.length)];
+      stroke(strokeColor);
       if (tri.eq < 0.99) {
         triangle(tri.p1.x, tri.p1.y, tri.p2.x, tri.p2.y, tri.p3.x, tri.p3.y);
 

@@ -23,7 +23,8 @@ function setup() {
   CENTER = p(CENTER_X, CENTER_Y, 0, false, "CENTER");
 
   NUMBER_OF_TRIANGLES = 1000;
-  EQUILATERALITY_RATIO = 0.999
+  EQUILATERALITY_RATIO = 0.999;
+  STAR_ATTRACTION_ZONE = 200;
   DISPLACEMENT = 4;
 
 
@@ -107,7 +108,7 @@ function v(p1,p2) {
 function movePoint(point, energy) {
   d = distance(point, CENTER);
   if (point.free) {
-    if (d>400) {
+    if (d>STAR_ATTRACTION_ZONE) {
       vec = v(point, CENTER);
       point.x += int(vec.x/100);
       point.y += int(vec.y/100);

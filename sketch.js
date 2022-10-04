@@ -1,6 +1,6 @@
 function setup() {
 
-  BACKGROUND_FADE = '0.1';
+  BACKGROUND_FADE = '0.01';
   ENERGY = 5;
 
   frame=0;
@@ -22,9 +22,13 @@ function setup() {
 
   CENTER = p(CENTER_X, CENTER_Y, 0, false, "CENTER");
 
-  NUMBER_OF_TRIANGLES = 1000;
+  NUMBER_OF_TRIANGLES = 100;
   EQUILATERALITY_RATIO = 0.999;
   STAR_ATTRACTION_ZONE = 200;
+  TRI_ATTRACTION_ZONE = 900;
+  TRI_DESTRUCTION_ZONE = 400;
+  TRI_CREATION_MIN_DIST = 100;
+  TRI_CREATION_MAX_DIST = 200;
   DISPLACEMENT = 4;
 
 
@@ -32,18 +36,19 @@ function setup() {
     "#03071e55", "#37061755", "#6a040f55", "#9d020855", "#d0000055", "#dc2f0255", "#e85d0455", "#f48c0655", "#faa30755", "#ffba0855"
   ];
   COLOR_PALETTE = [
-    "#02315E33",
-    "#00457E33",
-    "#2F70AF33",
-    "#B9848C33",
-    "#80649133",
+    "#02315E88",
+    "#00457E88",
+    "#2F70AF88",
+    "#B9848C88",
+    "#80649188",
   ];
 
 
   // Default config; can be overrided later by a named, or custom config
-  refreshColor = `rgba(10,20,40,0.1)`;
 
+  refreshColor = `rgba(10,10,10)`;
   background(refreshColor);
+  refreshColor = `rgba(10,10,10,${BACKGROUND_FADE})`;
 
   triangles=[];
   for (let i = 0, len = NUMBER_OF_TRIANGLES; i < len; i++) {
@@ -114,7 +119,7 @@ function movePoint(point, energy) {
       point.y += int(vec.y/100);
     }
   } else {
-    if (d<800) {
+    if (d<TRI_ATTRACTION_ZONE) {
       vec = v(point, CENTER);
       point.x -= int(vec.x/200);
       point.y -= int(vec.y/200);
@@ -174,13 +179,24 @@ function draw() {
 
       strokeColor = COLOR_PALETTE[Math.floor(Math.random() * COLOR_PALETTE.length)];
       stroke(strokeColor);
-      if (tri.eq < EQUILATERALITY_RATIO) {
-        triangle(tri.p1.x, tri.p1.y, tri.p2.x, tri.p2.y, tri.p3.x, tri.p3.y);
+      if (distance(p((tri.p1.x +tri.p2.x + tri.p3.x)/3,  (tri.p1.y + tri.p2.y + tri.p3.y)/3), CENTER) < TRI_DESTRUCTION_ZONE) {
+        if (tri.eq < EQUILATERALITY_RATIO) {
+          
+          triangle(tri.p1.x, tri.p1.y, tri.p2.x, tri.p2.y, tri.p3.x, tri.p3.y);
 
-        c1 = moveTriangle(tri, ENERGY);
-        c2 = moveTriangle(tri, ENERGY);
+          c1 = moveTriangle(tri, ENERGY);
+          c2 = moveTriangle(tri, ENERGY);
 
-        triangles[index] = (c1.eq > c2.eq) ? c1 : c2;
+          triangles[index] = (c1.eq > c2.eq) ? c1 : c2;
+        } else {
+          tri.p1.free = true;
+          stars.push(tri.p1);
+          tri.p2.free = true;
+          stars.push(tri.p2);
+          tri.p3.free = true;
+          stars.push(tri.p3);
+          trianglesToRemoveIndexes.push(index);
+        }
       } else {
         tri.p1.free = true;
         stars.push(tri.p1);
@@ -197,11 +213,6 @@ function draw() {
       triangles.splice(indexToRemove, 1);
     });
 
-//    console.log(stars.length);
-    if (stars.length > 50) {
-      frame=6000;
-    }
-
     for (let index = 0, len = stars.length; index < len; index++) {
       star = stars[index];
 
@@ -209,7 +220,7 @@ function draw() {
         circle(star.x, star.y, 5);
 
         //voisins=stars.filter(elt => elt.free).filter(elt => elt.uuid != star.uuid).map((otherStar, idx) => calculateDistancesWithIndex(idx, star, otherStar)).filter(x => (x.dst>5*ENERGY && x.dst < 110));
-        voisins=stars.filter(elt => elt.free).filter(elt => elt.uuid != star.uuid).filter(elt => (isInRange(distance(elt, star), 5*ENERGY, 110)));
+        voisins=stars.filter(elt => elt.free).filter(elt => elt.uuid != star.uuid).filter(elt => (isInRange(distance(elt, star), TRI_CREATION_MIN_DIST, TRI_CREATION_MAX_DIST)));
 
         if (voisins.length >=2) {
 //          console.log("For free star with voisins");
@@ -228,6 +239,7 @@ function draw() {
 //          console.log("voisins");
 //          console.log(voisins);
           starcopy={...star};
+          starcopy.free=false;
           newTri = t(starcopy, voisins[0], voisins[1]);
 //          console.log("newTri");
 //          console.log(newTri);
